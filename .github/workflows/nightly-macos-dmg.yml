@@ -104,5 +104,5 @@ jobs:
           gh release create "${{ steps.version.outputs.tag }}" \
             --title "${{ steps.version.outputs.name }}" \
             --notes-file /tmp/release-notes.md \
-            --prerelease \
+            --latest \
             $DMG_FILES

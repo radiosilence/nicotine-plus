@@ -62,8 +62,15 @@ jobs:
         with:
           path: artifacts/
 
-      - name: List artifacts
-        run: find artifacts/ -type f -name '*.dmg'
+      - name: Rename DMGs with date
+        run: |
+          DATE=${{ steps.version.outputs.date }}
+          for dmg in $(find artifacts/ -name '*.dmg' -type f); do
+            dir=$(dirname "$dmg")
+            base=$(basename "$dmg" .dmg)
+            mv "$dmg" "${dir}/${base}-${DATE}.dmg"
+          done
+          find artifacts/ -type f -name '*.dmg'
 
       - name: Delete previous nightly release
         env:

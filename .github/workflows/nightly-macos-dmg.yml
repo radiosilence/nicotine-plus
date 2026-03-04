@@ -99,12 +99,17 @@ jobs:
           - **Apple Silicon (arm64):** For M1/M2/M3/M4 Macs
           - **Intel (x86_64):** For Intel-based Macs
 
-          ### Installation
+          ### Install via Homebrew (Recommended)
+          ```sh
+          brew install radiosilence/nicotine-plus/nicotine-plus-nightly
+          ```
+
+          ### Manual Installation
           1. Download the DMG for your architecture
           2. Open the DMG and drag Nicotine+ to Applications
-          3. On first launch, right-click → Open (to bypass Gatekeeper for ad-hoc signed apps)
+          3. Remove quarantine: `xattr -cr /Applications/Nicotine+.app`
 
-          > These builds are ad-hoc signed (not notarized). You may need to allow them in System Settings → Privacy & Security.
+          > These builds are ad-hoc signed (not notarized). Homebrew install handles quarantine automatically.
           NOTES
 
           DMG_FILES=$(find artifacts/ -name '*.dmg' -type f)
@@ -113,3 +118,67 @@ jobs:
             --notes-file /tmp/release-notes.md \
             --latest \
             $DMG_FILES
+
+      - name: Update Homebrew tap
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "RELEASE_TOKEN not set, skipping tap update"
+            exit 0
+          fi
+
+          DATE=${{ steps.version.outputs.date }}
+          TAG=${{ steps.version.outputs.tag }}
+
+          ARM_DMG=$(find artifacts/ -name '*-arm64-*.dmg' -type f)
+          INTEL_DMG=$(find artifacts/ -name '*-x86_64-*.dmg' -type f)
+          ARM_SHA=$(sha256sum "$ARM_DMG" | awk '{print $1}')
+          INTEL_SHA=$(sha256sum "$INTEL_DMG" | awk '{print $1}')
+          ARM_NAME=$(basename "$ARM_DMG")
+          INTEL_NAME=$(basename "$INTEL_DMG")
+
+          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/radiosilence/homebrew-nicotine-plus.git" /tmp/homebrew-tap
+          cd /tmp/homebrew-tap
+          mkdir -p Casks
+
+          cat > Casks/nicotine-plus-nightly.rb <<CASK
+cask "nicotine-plus-nightly" do
+  version "${DATE}"
+
+  on_arm do
+    sha256 "${ARM_SHA}"
+    url "https://github.com/radiosilence/nicotine-plus/releases/download/${TAG}/${ARM_NAME}"
+  end
+
+  on_intel do
+    sha256 "${INTEL_SHA}"
+    url "https://github.com/radiosilence/nicotine-plus/releases/download/${TAG}/${INTEL_NAME}"
+  end
+
+  name "Nicotine+"
+  desc "Graphical client for the Soulseek peer-to-peer network (nightly build)"
+  homepage "https://github.com/radiosilence/nicotine-plus"
+
+  depends_on macos: ">= :ventura"
+
+  app "Nicotine+.app"
+
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-cr", "#{appdir}/Nicotine+.app"]
+  end
+
+  zap trash: [
+    "~/.config/nicotine",
+    "~/.local/share/nicotine",
+  ]
+end
+CASK
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Update nicotine-plus-nightly to ${DATE}"
+          git push

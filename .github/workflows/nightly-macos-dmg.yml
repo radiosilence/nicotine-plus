@@ -72,10 +72,13 @@ jobs:
           done
           find artifacts/ -type f -name '*.dmg'
 
-      - name: Delete previous nightly release
+      - name: Delete previous nightly releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Delete today's release if re-running
+          gh release delete "${{ steps.version.outputs.tag }}" --yes --cleanup-tag 2>/dev/null || true
+
           # Delete old nightly releases (keep last 7)
           gh release list --limit 100 --json tagName,createdAt \
             --jq '[.[] | select(.tagName | startswith("nightly-"))] | sort_by(.createdAt) | reverse | .[7:][] | .tagName' \

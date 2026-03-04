@@ -1,0 +1,108 @@
+name: Nightly macOS DMG
+on:
+  schedule:
+    - cron: "30 2 * * *"  # Daily at 02:30 UTC (after sync)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            platform: macos-15-intel
+          - arch: arm64
+            platform: macos-15
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Create Python virtual environment
+        run: |
+          brew uninstall --ignore-dependencies python@3.14 || true
+          brew install --overwrite python@3.14
+          python3.14 -m venv venv
+
+      - name: Install build dependencies
+        run: venv/bin/python3 build-aux/macos/dependencies.py
+
+      - name: Freeze application
+        run: venv/bin/python3 build-aux/macos/setup.py bdist_dmg
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos-${{ matrix.arch }}-dmg
+          path: build-aux/macos/build/*.dmg
+
+  release:
+    needs: build-macos
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Get version info
+        id: version
+        run: |
+          DATE=$(date -u +%Y%m%d)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "tag=nightly-${DATE}" >> "$GITHUB_OUTPUT"
+          echo "name=Nightly Build ${DATE} (${SHORT_SHA})" >> "$GITHUB_OUTPUT"
+          echo "date=${DATE}" >> "$GITHUB_OUTPUT"
+
+      - name: Download all DMG artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts/
+
+      - name: List artifacts
+        run: find artifacts/ -type f -name '*.dmg'
+
+      - name: Delete previous nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Delete old nightly releases (keep last 7)
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq '[.[] | select(.tagName | startswith("nightly-"))] | sort_by(.createdAt) | reverse | .[7:][] | .tagName' \
+            | while read -r tag; do
+                gh release delete "$tag" --yes --cleanup-tag || true
+              done
+
+      - name: Create nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat > /tmp/release-notes.md <<'NOTES'
+          ## Nightly macOS Build
+
+          **Date:** ${{ steps.version.outputs.date }}
+          **Commit:** ${{ github.sha }}
+
+          Ad-hoc signed macOS DMG binaries built from the latest upstream master.
+
+          ### Downloads
+          - **Apple Silicon (arm64):** For M1/M2/M3/M4 Macs
+          - **Intel (x86_64):** For Intel-based Macs
+
+          ### Installation
+          1. Download the DMG for your architecture
+          2. Open the DMG and drag Nicotine+ to Applications
+          3. On first launch, right-click → Open (to bypass Gatekeeper for ad-hoc signed apps)
+
+          > These builds are ad-hoc signed (not notarized). You may need to allow them in System Settings → Privacy & Security.
+          NOTES
+
+          DMG_FILES=$(find artifacts/ -name '*.dmg' -type f)
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --title "${{ steps.version.outputs.name }}" \
+            --notes-file /tmp/release-notes.md \
+            --prerelease \
+            $DMG_FILES

@@ -142,39 +142,39 @@ jobs:
           cd /tmp/homebrew-tap
           mkdir -p Casks
 
-          cat > Casks/nicotine-plus-nightly.rb <<CASK
-cask "nicotine-plus-nightly" do
-  version "${DATE}"
-
-  on_arm do
-    sha256 "${ARM_SHA}"
-    url "https://github.com/radiosilence/nicotine-plus/releases/download/${TAG}/${ARM_NAME}"
-  end
-
-  on_intel do
-    sha256 "${INTEL_SHA}"
-    url "https://github.com/radiosilence/nicotine-plus/releases/download/${TAG}/${INTEL_NAME}"
-  end
-
-  name "Nicotine+"
-  desc "Graphical client for the Soulseek peer-to-peer network (nightly build)"
-  homepage "https://github.com/radiosilence/nicotine-plus"
-
-  depends_on macos: ">= :ventura"
-
-  app "Nicotine+.app"
-
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/Nicotine+.app"]
-  end
-
-  zap trash: [
-    "~/.config/nicotine",
-    "~/.local/share/nicotine",
-  ]
-end
-CASK
+          {
+            printf 'cask "nicotine-plus-nightly" do\n'
+            printf '  version "%s"\n' "${DATE}"
+            printf '\n'
+            printf '  on_arm do\n'
+            printf '    sha256 "%s"\n' "${ARM_SHA}"
+            printf '    url "https://github.com/radiosilence/nicotine-plus/releases/download/%s/%s"\n' "${TAG}" "${ARM_NAME}"
+            printf '  end\n'
+            printf '\n'
+            printf '  on_intel do\n'
+            printf '    sha256 "%s"\n' "${INTEL_SHA}"
+            printf '    url "https://github.com/radiosilence/nicotine-plus/releases/download/%s/%s"\n' "${TAG}" "${INTEL_NAME}"
+            printf '  end\n'
+            printf '\n'
+            printf '  name "Nicotine+"\n'
+            printf '  desc "Graphical client for the Soulseek peer-to-peer network (nightly build)"\n'
+            printf '  homepage "https://github.com/radiosilence/nicotine-plus"\n'
+            printf '\n'
+            printf '  depends_on macos: ">= :ventura"\n'
+            printf '\n'
+            printf '  app "Nicotine+.app"\n'
+            printf '\n'
+            printf '  postflight do\n'
+            printf '    system_command "/usr/bin/xattr",\n'
+            printf '                   args: ["-cr", "#{appdir}/Nicotine+.app"]\n'
+            printf '  end\n'
+            printf '\n'
+            printf '  zap trash: [\n'
+            printf '    "~/.config/nicotine",\n'
+            printf '    "~/.local/share/nicotine",\n'
+            printf '  ]\n'
+            printf 'end\n'
+          } > Casks/nicotine-plus-nightly.rb
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

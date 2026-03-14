@@ -2,6 +2,12 @@ name: Nightly macOS DMG
 on:
   push:
     branches: [master]
+    paths:
+      - 'pynicotine/**'
+      - 'setup.py'
+      - 'setup.cfg'
+      - 'pyproject.toml'
+      - 'build-aux/**'
   workflow_dispatch:
 
 concurrency:

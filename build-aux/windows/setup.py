@@ -28,14 +28,12 @@ if sys.platform == "win32":
     UNAVAILABLE_MODULES = [
         "fcntl", "grp", "posix", "pwd", "readline", "resource", "syslog", "termios"
     ]
-    BIN_EXCLUDES = []
     ICON_NAME = "icon.ico"
 
 elif sys.platform == "darwin":
     SYS_BASE_PATH = sys.prefix
     LIB_PATH = os.path.join(SYS_BASE_PATH, "lib")
     UNAVAILABLE_MODULES = ["msvcrt", "nt", "nturl2path", "winreg", "winsound"]
-    BIN_EXCLUDES = ["libappstream*.dylib"]
     ICON_NAME = "icon.icns"
 
 else:
@@ -172,8 +170,14 @@ def add_typelibs():
     ]
 
     if sys.platform == "win32":
-        required_typelibs.append("GdkWin32-4")
-        required_typelibs.append("win32-")
+        required_typelibs += [
+            "GdkWin32-4",
+            "GioWin32-",
+            "GLibWin32-",
+            "win32-"
+        ]
+    else:
+        required_typelibs.append("GioUnix-")
 
     required_typelibs = tuple(required_typelibs)
 
@@ -238,7 +242,6 @@ setup(
             "packages": INCLUDED_MODULES,
             "excludes": EXCLUDED_MODULES,
             "include_files": include_files,
-            "bin_excludes": BIN_EXCLUDES,
             "zip_include_packages": ["*"],
             "zip_exclude_packages": [MODULE_NAME],
             "optimize": 2
@@ -289,6 +292,14 @@ setup(
             copyright=pynicotine.__copyright__,
             shortcut_name=pynicotine.__application_name__,
             shortcut_dir="ProgramMenuFolder"
+        ),
+        # Separate "console" executable required for CI startup test and debugging
+        Executable(
+            script=os.path.join(PROJECT_PATH, SCRIPT_NAME),
+            base="console",
+            target_name=f"{pynicotine.__application_name__}-debug",
+            manifest=MANIFEST_NAME,
+            copyright=pynicotine.__copyright__
         )
     ],
 )

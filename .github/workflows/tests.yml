@@ -15,7 +15,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15-dev", "pypy-3.11"]
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15-dev',
+                 'pypy-3.11-nightly']
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -26,7 +27,7 @@ jobs:
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ matrix.python }}
-          cache: "pip"
+          cache: 'pip'
           cache-dependency-path: setup.py
 
       - name: Install dependencies
@@ -57,16 +58,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container:
-          [
-            "debian:bookworm",
-            "debian:trixie",
-            "debian:unstable",
-            "ubuntu:jammy",
-            "ubuntu:noble",
-            "ubuntu:resolute",
-            "ubuntu:devel",
-          ]
+        container: ['debian:bookworm', 'debian:trixie', 'debian:unstable',
+                    'ubuntu:jammy', 'ubuntu:noble', 'ubuntu:resolute', 'ubuntu:devel']
     container: ${{ matrix.container }}
     steps:
       - name: Checkout code
@@ -87,9 +80,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ["fedora:rawhide"]
+        container: ['fedora:rawhide']
         gtk: [4, 3]
-        platform: ["ubuntu-latest", "ubuntu-24.04-arm"]
+        platform: ['ubuntu-latest', 'ubuntu-24.04-arm']
     runs-on: ${{ matrix.platform }}
     container: ${{ matrix.container }}
     steps:
@@ -119,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ["opensuse/tumbleweed"]
+        container: ['opensuse/tumbleweed']
     container: ${{ matrix.container }}
     steps:
       - name: Checkout code
@@ -148,7 +141,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ["alpine:edge"]
+        container: ['alpine:edge']
     container: ${{ matrix.container }}
     steps:
       - name: Checkout code
@@ -180,10 +173,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: freebsd
-          version: "15.0"
+          version: '15.0'
           run: |
             sudo pkg install -y cage dejavu gettext gtk4 py311-build py311-pygobject \
               py311-setuptools py311-wheel
@@ -207,10 +200,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: openbsd
-          version: "7.8"
+          version: '7.8'
           run: |
             sudo pkg_add gettext-tools gtk+4 py3-build py3-gobject3 py3-setuptools py3-wheel
 
@@ -231,10 +224,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: netbsd
-          version: "10.1"
+          version: '10.1'
           run: |
             sudo pkgin -y install python314
 
@@ -251,10 +244,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: dragonflybsd
-          version: "6.4.2"
+          version: '6.4.2'
           run: |
             sudo pkg install -y dejavu gettext gtk4 python311 py311-build py311-pygobject \
               py311-setuptools py311-wheel
@@ -273,10 +266,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@13ec3be3fbdfe52a660fe21c83f332747ed878be
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: midnightbsd
-          version: "4.0.4"
+          version: '4.0.4'
           run: |
             sudo mport index
             sudo mport install dejavu gettext gtk4 python311 py311-build py311-pygobject \
@@ -296,10 +289,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: haiku
-          version: "r1beta5"
+          version: 'r1beta5'
           run: |
             pkgman install -y harfbuzz_glib gettext gtk4 build_python310 pygobject_python310 \
               setuptools_python310 wheel_python310
@@ -316,10 +309,10 @@ jobs:
           persist-credentials: false
 
       - name: Tests
-        uses: cross-platform-actions/action@233156312992f3f169d8d0c633c21d12a5d30455 # v1.0.0
+        uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: omnios
-          version: "r151056"
+          version: 'r151056'
           run: |
             BOOTSTRAP_TAR="bootstrap-2025Q4-x86_64.tar.gz"
             curl -O https://pkgsrc.smartos.org/packages/SmartOS/bootstrap/${BOOTSTRAP_TAR}

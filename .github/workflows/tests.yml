@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         python: ['3.10', '3.11', '3.12', '3.13', '3.14', '3.15-dev',
-                 'pypy-3.11-nightly']
+                 'pypy-3.10', pypy-3.11-nightly']
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -312,7 +312,7 @@ jobs:
         uses: cross-platform-actions/action@0c165ad7eb2d6a7e8552d6af5aad2bbedfc646b0 # v1.1.0
         with:
           operating_system: omnios
-          version: 'r151056'
+          version: 'r151058'
           run: |
             BOOTSTRAP_TAR="bootstrap-2025Q4-x86_64.tar.gz"
             curl -O https://pkgsrc.smartos.org/packages/SmartOS/bootstrap/${BOOTSTRAP_TAR}

@@ -177,7 +177,7 @@ jobs:
             printf '  desc "Graphical client for the Soulseek peer-to-peer network (nightly build)"\n'
             printf '  homepage "https://github.com/radiosilence/nicotine-plus"\n'
             printf '\n'
-            printf '  depends_on macos: ">= :ventura"\n'
+            printf '  depends_on macos: :sonoma\n'
             printf '\n'
             printf '  app "Nicotine+.app"\n'
             printf '\n'

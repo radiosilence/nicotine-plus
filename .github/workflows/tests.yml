@@ -387,7 +387,7 @@ jobs:
       - name: Set up package repository
         run: |
           BOOTSTRAP_TAR="bootstrap-2025Q4-x86_64.tar.gz"
-          curl -O https://pkgsrc.smartos.org/packages/SmartOS/bootstrap/${BOOTSTRAP_TAR}
+          curl --proto "=https" -fLO https://pkgsrc.smartos.org/packages/SmartOS/bootstrap/${BOOTSTRAP_TAR}
           sudo tar -zxpf ${BOOTSTRAP_TAR} -C /
 
       - name: Install dependencies
@@ -492,7 +492,7 @@ jobs:
 
       - name: Set up Miniforge
         run: |
-          wget "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+          curl --proto "=https" -fLO "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
           bash "Miniforge3-$(uname)-$(uname -m).sh" -b -p "$HOME/miniforge3"
           echo "$HOME/miniforge3/bin" >> "$GITHUB_PATH"
 
